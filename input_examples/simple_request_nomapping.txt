@@ -1,0 +1,17 @@
+# url is your institution's resource url for alma 
+url	https://api-na.hosted.exlibrisgroup.com/almaws/v1/analytics/reports
+
+# path is where to find the analytic
+# you can include multiple paths for when running parallel threads
+path	/shared/University of Washington/Reports/testing/Deibel_HathiTrust_Monographs_MPMs_1
+path	/shared/University of Washington/Reports/testing/Deibel_HathiTrust_Monographs_MPMs_2
+
+# apikey is the authentication required by alma
+# as with multiple paths, multiple apikeys can be included for parallelism
+apikey	l7xxdfed8deaca3b48f6a32b2ef8ec0792ce
+apikey	l7xx3ef46b414474475e8963af603159c459
+apikey	l7xx7bad2d74b8294660bed5d1ae8fd4485c
+apikey	l7xx720e4a79ec8948839a6fbc935cadd371
+apikey	l7xxc50a023f9ca2424b8a320a49a58e17ac
+apikey	l7xx712eb6adfcf144c28249a8268c972b4b
+
