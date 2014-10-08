@@ -19,6 +19,7 @@ redirect):
 from __future__ import print_function
 
 import codecs
+import math
 import os
 import stat
 import sys
@@ -66,7 +67,12 @@ def main(argv):
         limit = int(limit)
     # round up to nearest multiple of 25
     old_limit = limit
-    
+    limit = int(math.ceil(limit/25.0)) * 25
+    if limit != old_limit:
+        print("Limit rounded up to nearest multiple of 25: %d --> %d" \
+              % (old_limit, limit))
+              
+
 
     filename = raw_input(u"Save data to file:\n> ")
     if echoInput: print(filename)
