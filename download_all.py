@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+"""
+Retrieve all data (even more than 65001 rows) from an Alma analytic
+
+This file is an example of how to perform query all with optional
+multithreading by using a QueryFactory along with RequestObject and
+AnalyticAgent.
+
+This script requires the user to provide an input file for a RequestObject.
+The RequestObject will be loaded as a complex request. 
+"""
 
 ##########################################################################
 # Copyright (c) 2014 Katherine Deibel
