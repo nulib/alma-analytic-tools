@@ -1,5 +1,5 @@
 https://api-na.hosted.exlibrisgroup.com/almaws/v1/analytics/reports
-/shared/University of Washington/Reports/testing/Deibel_HathiTrust_Monographs_MPMs_2
-l7xxdfed8deaca3b48f6a32b2ef8ec0792ce
+/shared/University/Reports/test/Analytic_Name
+l7xxdfed..792ce
 137
 page.xml
