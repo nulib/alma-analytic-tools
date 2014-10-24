@@ -26,7 +26,7 @@ The code found in this repository was written in Python 2 (developed and tested 
 * [bidict package](https://pypi.python.org/pypi/bidict/0.3.1): bidirectional dictionary object
 * [enum34 package](https://pypi.python.org/pypi/enum34/1.0): backport of Python 3.4.'s enum package
 
-The versions used in the development of this code are included in this repository for convenience. We hold no claim to these files
+The versions used in the development of this code are included in this repository for convenience. We hold no claim to these files.
 
 One additional package is recommended for performance reasons but is not absolutely required:
 
@@ -60,4 +60,3 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
