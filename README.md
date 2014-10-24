@@ -1,5 +1,5 @@
 # University of Washington Libraries Alma Analytic Tools #
-Alma's analytics are powerful tools for accessing, collecting, and exploring the various information contained within an Alma repository. Despite options such as reports and dashboards for communicating any analytic results, sometimes one needs access to the raw data itself. For such purposes, one must use the |Alma RESTful APIs and perform one or more HTTP GET requests. This package provides a Python implementation to simplify and support that process.
+Alma's analytics are powerful tools for accessing, collecting, and exploring the various information contained within an Alma repository. Despite options such as reports and dashboards for communicating any analytic results, sometimes one needs access to the raw data itself. For such purposes, one must use the Alma RESTful APIs and perform one or more HTTP GET requests. This package provides a Python implementation to simplify and support that process.
 
 ## Content Highlights ##
 
