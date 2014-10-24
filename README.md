@@ -36,10 +36,10 @@ One additional package is recommended for performance reasons but is not absolut
 Each file contains detailed python docstrings and comments. In addition, this wiki also contains the following documents:
 
 [Understanding Analytic GET Requests](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools/wiki/Understanding_Analytic_GET_Requests)
-: This page details various issues and challenges in using the API to query analytic data. Error states and limitations are discussed. Most importantly, this page describes how to download all data from an analytic even if it breaks the hard set 65001 limit.
+: This page details various issues and challenges in using the API to query analytic data. Error states and limitations are discussed. Most importantly, this page describes how to download all data from an analytic even if it breaks the hardset 65001 limit.
 
 [Request Object File Format](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools/wiki/Request_Object_File_Format)
-: An in-depth discussion of how the input files for creating a ##RequestObject##.
+: An in-depth discussion of how to write the input files for creating a ##RequestObject##.
 
 [Current Issues and Future Work](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools/wiki/Current_Issues_and_Future_Work)
 : A description of the current status of the code and its potential next directions.
