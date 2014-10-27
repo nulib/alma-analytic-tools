@@ -1,4 +1,4 @@
-# ComplexAnalyticAgent.py
+# AnalyticAgent.py
 # -*- coding: utf-8 -*-
 """
 Code for managing RESTful queries with the ALMA Analytic API. This
