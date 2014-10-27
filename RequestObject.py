@@ -222,6 +222,8 @@ class RequestObject(object):
                             self.JobBounds.append(None)
                         elif self.sortedByType == 'decimal':
                             self.JobBounds.append(float(bound))
+                        elif self.sortedByType == 'string':
+                            self.JobBounds.append(bound.upper())                            
                         else:
                             self.JobBounds.append(bound)
                 except:
