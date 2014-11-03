@@ -184,7 +184,7 @@ class QueryFactory(object):
             print("Checking previously completed work before resuming...")
             _unfinished = []
             for job in jobs_list:
-                _filename = self.AgentClass.data_filename(self.FileStem, i)
+                _filename = self.AgentClass.data_filename(self.FileStem, job)
                 if not os.path.isfile(_filename):
                     _unfinished.append(job)
 
@@ -738,7 +738,8 @@ class Coordinator(multiprocessing.Process):
         except KeyboardInterrupt as e:
             print("Interrupt in: " + unicode(self.name))
             raise e        
-        except:
+        except Exception as e:
+            print("Coordinator exception: " + unicode(e))
             pass
     # end run
 # end Coordinator
