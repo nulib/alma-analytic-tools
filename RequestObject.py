@@ -223,7 +223,7 @@ class RequestObject(object):
                         elif self.sortedByType == 'decimal':
                             self.JobBounds.append(float(bound))
                         elif self.sortedByType == 'string':
-                            self.JobBounds.append(bound.upper())                            
+                            self.JobBounds.append(bound.capitalize())                            
                         else:
                             self.JobBounds.append(bound)
                 except:
