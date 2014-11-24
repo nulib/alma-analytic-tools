@@ -44,6 +44,9 @@ Each file contains detailed python docstrings and comments. In addition, this wi
 [Current Issues and Future Work](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools/wiki/Current_Issues_and_Future_Work)
 : A description of the current status of the code and its potential next directions.
 
+[HathiTrust Print Holdings Download](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools/wiki/HathiTrust%20Print%20Holdings)
+: Details on how to use the code for downloading [[http://www.hathitrust.org/print_holdings|print holdings for HathiTrust]].
+
 ## License ##
 This code is released under the OpenBSD license: 
 
