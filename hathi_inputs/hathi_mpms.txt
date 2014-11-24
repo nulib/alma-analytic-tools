@@ -1,0 +1,51 @@
+# url is your institution's resource url for alma 
+url	https://api-na.hosted.exlibrisgroup.com/almaws/v1/analytics/reports
+
+# path is where to find the analytic
+# you can include multiple paths for when running parallel threads
+path	/shared/.../HathiTrust_Print_Holdings/HathiTrust_MPMs_1
+path	/shared/.../HathiTrust_Print_Holdings/HathiTrust_MPMs_2
+
+# apikey is the authentication required by alma
+# as with multiple paths, multiple apikeys can be included for parallelism
+apikey	l7xxdfed8deac........32b2ef8ec0792ce
+apikey	l7xx3ef46b414...........af603159c459
+apikey	l7xx7bad2...................8fd4485c
+
+
+# names to columns: preferred name (xml element rules) and then column in 
+# the analytic xml (named as Column#)
+#
+# output will be in the order the names are given here
+Begin NamesToColumns
+Title	Column3
+MMS_ID	Column1
+Holding_ID	Column4
+Item_ID	Column5
+Summary_Holding	Column5
+Raw_OCLC	Column2
+End NamesToColumns
+
+# should be one of the preferred names
+uniqueID	Holding_ID
+
+# should be a preferred name 
+sortedBy	Title
+
+# the data type used in the OBIEE: string, decimal (date, datetime to be 
+# implemented later)
+sortedByType	string
+
+# the name of the field used within OBIEE. Is of the form Field.Subfield
+sortedByOBIEE	Bibliographic Details.Title
+
+# job_bounds (optional)
+# a comma-separated list of the same type as sortedBy in which each 
+# consecutive pair (x,y) will form a job that only gathers entries of 
+# the form x <= sortedBy < y
+#
+# negative and positive infinity can be achieved by placing commas at
+# beginning and the end of the list: ,a,m,z,
+#
+# any spaces within the bound list will be ignored
+jobBounds	,H,S,
