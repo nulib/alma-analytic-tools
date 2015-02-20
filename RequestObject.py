@@ -73,7 +73,9 @@ class RequestObject(object):
                    
     sortedByOBIEE  The name of the OBIEE field.subfield that contains the 
                    data for sortedBy
-                   
+
+    jobCount       Number of jobs listed. Defaults to 1 for simple requests.
+    
     JobBounds      A list of values used to distinguish the different jobs
                    that parallel code will perform by creating filters on 
                    the sortedBy field/column in the analytic. Each job is
@@ -100,6 +102,7 @@ class RequestObject(object):
         self.sortedBy = None
         self.sortedByType = None
         self.sortedByOBIEE = None
+        self.jobCount = 1
         self.JobBounds = [None, None]
         self.NamesOrder = []
         self.ColumnMap = bidict.namedbidict('biMap', 'columns', 'names')({})
@@ -156,6 +159,7 @@ class RequestObject(object):
             setattr(self, x, None)
         self.Paths = []
         self.Keys = []
+        self.jobCount = 1;
         self.JobBounds = [None,None]
         self.NamesOrder = []
         self.ColumnMap = bidict.namedbidict('biMap', 'columns', 'names')({})
@@ -289,16 +293,22 @@ class RequestObject(object):
                     self._parse_error(reader,lineNo,'Problems reading column to name data')
             else:
                 self._parse_error(reader,lineNo,'Unrecognized error')            
+        # end for line in reader
 
         # if jobbounds was empty, make it none,none
         if self.JobBounds is None:
             self.JobBounds = [None, None]
 
-        # shuffle the Paths and Keys for the heck of it
+        # set jobCount accordingly
+        if simpleRequest:
+            self.jobCount = 1
+        else:
+            self.jobCount = len(self.JobBounds) - 1        
+
+        #shuffle the Paths and Keys for the heck of it
         shuffle(self.Paths)
         shuffle(self.Keys)
 
-        # end for line in reader
         errors = []
         if not self.validate(log=errors,simpleRequest=simpleRequest):
             msg = u"Error(s) found in this RequestObject's data:\n"
@@ -351,8 +361,6 @@ class RequestObject(object):
             return False
         else:
             simpleReqest = self.Simple
-
-        
         
         # must be a URL
         if self.URL is None or len(self.URL) == 0:
@@ -439,6 +447,12 @@ class RequestObject(object):
                                + ' >= ' + unicode(self.JobBounds[i+1]) \
                                )
 
+        # force jobCount to be correct
+        if simpleRequest:
+            self.jobCount = 1
+        else:
+            self.jobCount = len(self.JobBounds) - 1
+        
         return (len(log) == 0)
     # end validate
 # end class RequestObject       

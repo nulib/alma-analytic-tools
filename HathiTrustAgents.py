@@ -5,18 +5,18 @@ from AnalyticAgent import AnalyticAgent
 
 import codecs
 import re
+from string import rjust
 
 class BaseHathiAgent(AnalyticAgent):
     PRINT_TITLES = False    
     def __init__(self):
         AnalyticAgent.__init__(self)
         self.noOCLC = []
-        self.StillLoadingSleep = 45
-        self.ErrorSleep = 45
-        self.SleepNoise = 10
+        self.StillLoadingSleep = 10
+        self.SleepNoise = 4
 
     @staticmethod
-    def data_filename(stem,id=None):
+    def data_filename(stem,id=None,digits=None,leading='0'):
         """
         HOOK: Static method that returns a filename for the type of data
         that this agent will produce.
@@ -25,19 +25,24 @@ class BaseHathiAgent(AnalyticAgent):
         the form: stem[-id].xml
 
         Parameters:
-          stem  The filestem to be used
-          id    An identification number/symbol
+          stem     The filestem to be used
+          id       An identification number/symbol
+          digits   The number of 'digits' to expand the id to with leading
+          leading  What character to use to expand the id to digits length
 
         Returns:
-          If id is None: stem.xml
-          Else:          stem-id.xml
+          If id is None:                         stem.xml
+          If id='5' and digits is none:          stem-5.xml
+          If id='5', digits=3, and leading='x':  stem-xx5.xml                                
 
         """
         if id is None:
             return stem + u'.tsv'
-        else:
+        elif digits is None:
             return stem + u'-' + unicode(id) + u'.tsv'
-
+        else:
+            return stem + u'-' + rjust(unicode(id),digits,leading) + u'.tsv'
+            
     def pre_process(self):
         self.noOCLC = []
 

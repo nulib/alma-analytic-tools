@@ -67,11 +67,11 @@ class QueryType(Enum):
     """
     An enumeration characterizing the three types of queries that AnalyticAgent
     can perform:
-      PAGE        Return only a 'limit' number of results, where limit is a
+      PAGE       Return only a 'limit' number of results, where limit is a
                  parameter in the query such that 25 <= limit <= 1000.
-      REPORT      Return multiple pages up to reaching the upper bound of
+      REPORT     Return multiple pages up to reaching the upper bound of
                  AnalyticAgent.OBIEE_MAX (currently 65001) records.
-      ALL         Return multiple reports such that all records are pulled
+      ALL        Return multiple reports such that all records are pulled
                  from the analytic. Requires a non-simple RequestObject
                  as the queries must be specifically structured in order
                  to bypass the hard-coded OBIEE_MAX limit
@@ -612,6 +612,7 @@ class AnalyticAgent(object):
           invalid for the type of call to run
                        
         """
+		
         # do basic parameter checking first
         if queryType not in QueryType:
             raise ValueError(u"Unrecognized QueryType passed into queryType parameter.")
@@ -795,14 +796,18 @@ class AnalyticAgent(object):
                 try: # hopefully we won't get a server error
                     requestTries = requestTries + 1
                     response = urlopen(_request).read()
-                    loopFlag = False
+                    loopFlag = False                    
                 except HTTPError as e:
-                    # if we do, sleep and try again until tolerance exceeded
+                    # if we do, sleep and try again until tolerance exceeded					
                     if requestTries < self.FailedRequestTolerance:
                         loopFlag = True
+                        msg = u"Returned data:" + u"\n"
+                        msg = msg + unicode(e.read()) + u"\n"
                         self.log(self._jobName
                                  + u" received error status " \
-                                 + unicode(e.code) + u", trying again...")
+                                 + unicode(e.code) + u":\n" \
+                                 + msg + u"\n" \
+                                 + u"Trying again...")
                         self.noisy_sleep(self.ErrorSleep, self.SleepNoise)
                     else:
                         # throw a custom exception with the HTTPError

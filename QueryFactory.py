@@ -51,7 +51,8 @@ Classes:
 
 from __future__ import print_function
 from time import sleep, strftime
-from random import uniform
+from random import uniform, shuffle
+from math import ceil, log10
 
 import multiprocessing
 import multiprocessing.managers
@@ -171,7 +172,7 @@ class QueryFactory(object):
         writer = codecs.open(QueryFactory.jobmap_filename(self.FileStem),
                              'w', encoding='utf-8')
         for i in jobs_list:
-            writer.write(self.AgentClass.data_filename(self.FileStem, i))
+            writer.write(self.AgentClass.data_filename(self.FileStem, i, int(ceil(log10(self.Request.jobCount)))))
             writer.write(u'\t')
             writer.write(QueryFactory.filterrange_text(self.Request.JobBounds[i-1],
                                                        self.Request.JobBounds[i]))
@@ -184,7 +185,7 @@ class QueryFactory(object):
             print("Checking previously completed work before resuming...")
             _unfinished = []
             for job in jobs_list:
-                _filename = self.AgentClass.data_filename(self.FileStem, job)
+                _filename = self.AgentClass.data_filename(self.FileStem, job, int(ceil(log10(self.Request.jobCount))))
                 if not os.path.isfile(_filename):
                     _unfinished.append(job)
 
@@ -205,7 +206,7 @@ class QueryFactory(object):
             
             jobs_list = _unfinished
         #end if ResumeWork
-
+        shuffle(jobs_list)
 
         print("Starting up Factory.")
         sleep(1.5) # just for show
@@ -462,6 +463,8 @@ class Worker(multiprocessing.Process):
             Sleep a little before trying again 
         """
         self.log_queue.put(strftime("%H:%M:%S") + u" : " + unicode(self.name) + u"> started")
+        self.log_queue.put(strftime("%H:%M:%S") + u" : " + unicode(self.name) + u"> Path: " + self.path)
+        self.log_queue.put(strftime("%H:%M:%S") + u" : " + unicode(self.name) + u"> APIkey: " + self.apikey)
         startIndex = ""
         try:
             while True:
@@ -480,7 +483,7 @@ class Worker(multiprocessing.Process):
                                    + u"> starting job " + unicode(jobID) + u" "
                                    + QueryFactory.filterrange_text(filterStart,filterStop))
 
-                filename = self.agent.data_filename(self.filestem, jobID)
+                filename = self.agent.data_filename(self.filestem, jobID, int(ceil(log10(self.request.jobCount))))
                 outfile = codecs.open(filename,'w', encoding='utf-8')
                 self.last_job[self.name] = filename                
                 try:
