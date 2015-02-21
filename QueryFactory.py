@@ -644,7 +644,11 @@ class Coordinator(multiprocessing.Process):
         
         self.coordinator_queue = coordinator_queue
         self.jobs_list = jobs_list[:] # we want a copy
-        self.job_attempts = [0] * (len(jobs_list) + 1) # +1 since jobs are numbered 1..n
+
+        self.job_attempts = {}
+        for i in xrange(1, len(jobs_list)):
+            self.job_attemps[ jobs_list[i] ] = 0
+            
         self.job_queue = job_queue
         self.log_queue = log_queue
         self.num_workers = num_workers
