@@ -647,7 +647,7 @@ class Coordinator(multiprocessing.Process):
 
         self.job_attempts = {}
         for i in xrange(1, len(jobs_list)):
-            self.job_attemps[ jobs_list[i] ] = 0
+            self.job_attempts[ jobs_list[i] ] = 0
             
         self.job_queue = job_queue
         self.log_queue = log_queue
