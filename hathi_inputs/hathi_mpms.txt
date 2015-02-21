@@ -21,7 +21,6 @@ Begin NamesToColumns
 Title	Column3
 MMS_ID	Column1
 Holding_ID	Column4
-Item_ID	Column5
 Summary_Holding	Column5
 Raw_OCLC	Column2
 End NamesToColumns
