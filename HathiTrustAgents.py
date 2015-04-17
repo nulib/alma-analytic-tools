@@ -16,32 +16,12 @@ class BaseHathiAgent(AnalyticAgent):
         self.SleepNoise = 4
 
     @staticmethod
-    def data_filename(stem,id=None,digits=None,leading='0'):
+    def data_filename(stem,extension=u'tsv',id=None,digits=None,leading='0'):
         """
-        HOOK: Static method that returns a filename for the type of data
-        that this agent will produce.
-
-        As this Agent currently outputs xml, it generates filenames of
-        the form: stem[-id].xml
-
-        Parameters:
-          stem     The filestem to be used
-          id       An identification number/symbol
-          digits   The number of 'digits' to expand the id to with leading
-          leading  What character to use to expand the id to digits length
-
-        Returns:
-          If id is None:                         stem.xml
-          If id='5' and digits is none:          stem-5.xml
-          If id='5', digits=3, and leading='x':  stem-xx5.xml                                
-
+        Extension of Analytic Agent's data_filename(...) that insists upon
+        the extension being tsv.
         """
-        if id is None:
-            return stem + u'.tsv'
-        elif digits is None:
-            return stem + u'-' + unicode(id) + u'.tsv'
-        else:
-            return stem + u'-' + rjust(unicode(id),digits,leading) + u'.tsv'
+        return AnalyticAgent.data_filename(stem,u'tsv',id,digits,leading)
             
     def pre_process(self):
         self.noOCLC = []
