@@ -17,7 +17,7 @@ The RequestObject will be loaded as a complex request.
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
 #
-# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# THE SOFTWARE IS PROVIDED 'AS IS' AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 # WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
 # ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -39,22 +39,23 @@ from QueryFactory import QueryFactory
 # List the options/flags for query_analytic to make it easier to
 # generate the help message.
 options = {}
-options[u"-h, --help"] = u"Display this help and exit."
-options[u"-d, --debug"] = u"Print titles in the output."
-options[u"-n, --threads=N"] = u"Run the query using N parallel threads. Default: 1."
-options[u"-q, --quiet"] = u"Quiet mode. Logging only written to file and not the screen."
-options[u"-r, --resume"] = u"Re-run the request but skip any previously completed jobs."
-
+options[u'-h, --help'] = u'Display this help and exit'
+options[u'-d, --debug'] = u'Print titles in the output'
+options[u'-n, --threads=N'] = u'Run the query using N parallel threads. Default: 1'
+options[u'-q, --quiet'] = u'Quiet mode. Logging only written to file and not the screen'
+options[u'-r, --resume'] = u'Re-run the request but skip any previously completed jobs'
+options[u'-i, --input=path'] = u'Path to directory for input files. Default: ./hathi_inputs'
+        
 required = {}
-required[u"--serial"] = u"Download serial holdings (hathi_inputs/hathi_serials.txt)."
-required[u"--spm"] = u"Download single-part monograph holdings (hathi_inputs/hathi_spms.txt)."
-required[u"--mpm"] = u"Download multi-part monograph holdings (hathi_inputs/hathi_mpms.txt)."
+required[u'--serial'] = u'Download serial holdings (hathi_serials.txt)'
+required[u'--spm'] = u'Download single-part monograph holdings (hathi_spms.txt)'
+required[u'--mpm'] = u'Download multi-part monograph holdings (hathi_mpms.txt)'
 
 def print_help():
     """Print the help message."""
-    print(u"Usage: hathi_download.py [options] [holding type]")
+    print(u'Usage: hathi_download.py [options] [holding type]')
     
-    print(u"Options:")
+    print(u'Options:')
 
     _opts = options.keys()
     _opts.sort()
@@ -62,13 +63,13 @@ def print_help():
     n = len( max(_opts, key=len) )
 
     for o in _opts:
-        print( u" " + o.ljust(n+2,u' ') + options.get(o) )
+        print( u' ' + o.ljust(n+2,u' ') + options.get(o) )
 
-    print(u"And one of the following:")
+    print(u'And exactly ONE of the following is required:')
     _reqs = required.keys()
     _reqs.sort()
     for r in _reqs:
-        print( u" " + r.ljust(n+2,u' ') + required.get(r) )
+        print( u' ' + r.ljust(n+2,u' ') + required.get(r) )
 
 
 def main(argv):
@@ -77,8 +78,8 @@ def main(argv):
     it up.
     """
     # process the command line    
-    shortopts = "hdqrn:"
-    longopts = ["help","debug", "quiet", "threads=", "resume", "serial", "mpm", "spm"]
+    shortopts = 'hdqrn:i:'
+    longopts = ['help','debug', 'quiet', 'threads=', 'input=', 'resume', 'serial', 'mpm', 'spm']
     try:
         opts, args = getopt.gnu_getopt(argv, shortopts, longopts)
     except getopt.GetoptError as err:
@@ -97,37 +98,48 @@ def main(argv):
     screenLogging = True
     resumeWork = False
     printTitles = False
-    fileStem = "data"
+    fileStem = 'data'
     holdingType = None
     agtClass = AnalyticAgent
+    inputPath = 'hathi_inputs/'
    
     # process the options now              
     for opt, arg in opts:
-        if opt == "-h" or opt == "--help":
+        if opt == '-h' or opt == '--help':
             print_help()
             sys.exit(0)
-        elif opt == "-n" or opt == "--threads":
+        elif opt == '-n' or opt == '--threads':
             numThreads = int(arg)
             if numThreads < 1:
-                print(u"The number of threads must be at least 1!",
+                print(u'The number of threads must be at least 1!',
                       file=sys.stderr)
                 sys.exit(2)
-        elif opt == "-q" or opt == "--quiet":
+        elif opt == '-i' or opt == '--input':
+            inputPath = arg.strip()
+            # make sure there is a slash at end of path            
+            if inputPath[-1] != '/': 
+                inputPath += '/'
+            # check directory existence
+            if not os.path.isdir(inputPath):
+                print(u'Path: ' + inputPath + u' is not a path / is inaccessible',
+                      file=sys.stderr)
+                sys.exit(2)            
+        elif opt == '-q' or opt == '--quiet':
             screenLogging = False
-        elif opt == "-r" or opt == "--resume":
+        elif opt == '-r' or opt == '--resume':
             resumeWork = True
-        elif opt == "-d" or opt == "--debug":
+        elif opt == '-d' or opt == '--debug':
             printTitles = True            
-        elif opt == "-z" or opt == "--zero":
+        elif opt == '-z' or opt == '--zero':
             allowZeros = True
-        elif opt == "--serial":
-            holdingType = "serial"
+        elif opt == '--serial':
+            holdingType = 'serial'
             agtClass = HathiSerialAgent
-        elif opt == "--spm":
-            holdingType = "spm"
+        elif opt == '--spm':
+            holdingType = 'spm'
             agtClass = HathiSPMAgent            
-        elif opt == "--mpm":
-            holdingType = "mpm"
+        elif opt == '--mpm':
+            holdingType = 'mpm'
             agtClass = HathiMPMAgent
 
     # check that only one holding type is given
@@ -136,16 +148,22 @@ def main(argv):
         if opt in ['--serial', '--spm', '--mpm' ]:
             n = n + 1
     if n == 0:
-        print(u"You must include a holding type: --serial, --spm, or --mpm",
+        print(u'You must include a holding type: --serial, --spm, or --mpm',
               file=sys.stderr)
         sys.exit(2)
     elif n > 1:
-        print(u"You can only request one holding type at a time!",
+        print(u'You can only request one holding type at a time!',
               file=sys.stderr)
 
     # set various parameters based on the holding type
-    requestFile = "hathi_inputs/hathi_" + holdingType + "s.txt"
     fileStem = holdingType
+    requestFile = inputPath + 'hathi_' + holdingType + 's.txt'
+
+    # check that requestFile exists
+    if not os.path.isfile(requestFile):
+        print('Unable to read input file: ' + requestFile,
+              file=sys.stderr)
+        sys.exit(2)
     
     # attempt to load the request object
     try:
@@ -153,39 +171,39 @@ def main(argv):
     except Exception as e:
         lines = unicode(e).splitlines()
         if len(lines) == 1:
-            print(u"Formatting error detected.", file=sys.stderr)
-            print(u"--> " + lines[0], file=sys.stderr)
+            print(u'Formatting error detected.', file=sys.stderr)
+            print(u'--> ' + lines[0], file=sys.stderr)
         else:
             print( lines[0], file=sys.stderr)
             for line in lines[1:]:
-                print(u"--> " + line, file=sys.stderr)
+                print(u'--> ' + line, file=sys.stderr)
         sys.exit(1)
 
-    print(u"Loaded analytic request: " + requestFile)
+    print(u'Loaded analytic request: ' + requestFile)
     numJobs = len(request.JobBounds) - 1
 
-    print(u"Jobs to complete: " + unicode(numJobs))
+    print(u'Jobs to complete: ' + unicode(numJobs))
         
     # check the numbers with the processors
     if numJobs < numThreads:
         numThreads = numJobs
-        print(u"Parallel threads: " + unicode(numThreads) \
-              + u" (reduced to number of jobs)")
+        print(u'Parallel threads: ' + unicode(numThreads) \
+              + u' (reduced to number of jobs)')
     else:
-        print(u"Parallel threads: " + unicode(numThreads))
+        print(u'Parallel threads: ' + unicode(numThreads))
 
-    print(u"Output files: ")
-    print(u"   " + unicode(numJobs) + " data file(s): " \
+    print(u'Output files: ')
+    print(u'   ' + unicode(numJobs) + ' data file(s): ' \
           +agtClass.data_filename(fileStem,u'#'))
 
-    print(u"   " + u"1 file mapping job numbers to bounds: " \
+    print(u'   ' + u'1 file mapping job numbers to bounds: ' \
           + QueryFactory.jobmap_filename(fileStem) )
 
-    print(u"   " + u"1 log file: " 
+    print(u'   ' + u'1 log file: ' 
           + QueryFactory.log_filename(fileStem) )
 
-    print(u"   " + unicode(numJobs) + " no OCLC file(s): " \
-          + agtClass.data_filename("no-oclc-" + fileStem,u'#'))
+    print(u'   ' + unicode(numJobs) + ' no OCLC file(s): ' \
+          + agtClass.data_filename('no-oclc-' + fileStem,u'#'))
 
 
     # before starting the factory, set the BaseHathiAgent for debugging
@@ -196,7 +214,7 @@ def main(argv):
                            allow_zeros=allowZeros, resume_work=resumeWork, 
                            agent_class=agtClass)
     print()
-    print(u"Grabbing Analytic data (press Ctrl+C to quit)...")
+    print(u'Grabbing Analytic data (press Ctrl+C to quit)...')
     print()
 
     if factory.engage():
@@ -204,5 +222,5 @@ def main(argv):
     else:
         sys.exit(1)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(sys.argv)
