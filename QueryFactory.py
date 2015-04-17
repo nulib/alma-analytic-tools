@@ -246,7 +246,10 @@ class QueryFactory(object):
 
         # create logger
         logfile = QueryFactory.log_filename(self.FileStem)
-        log_outputs = [ codecs.open(logfile, 'w', encoding='utf-8') ]
+        if self.ResumeWork: # append the log instead of writing it over
+            log_outputs = [ codecs.open(logfile, 'a', encoding='utf-8') ]            
+        else:
+            log_outputs = [ codecs.open(logfile, 'w', encoding='utf-8') ]
         if self.ToStandardOut:
             log_outputs.append( sys.stdout )
         logger = Logger(log_queue=log_queue, output=log_outputs)
