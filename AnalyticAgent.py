@@ -456,34 +456,8 @@ class AnalyticAgent(object):
                 raise TypeError(u"AnalyticAgent: self._logger element: '" + unicode(out)
                                 + "u' does not have a write(...) or put(...)method" )            
         #end for out in ...
-    #end log(...)
-
-    def post_abort(self, *args):
-        """
-        HOOK: This method can be used to clean up files after a run is 
-        aborted.
-        
-        By default, it is not called automatically and must be called by 
-        the calling agent. 
-                
-        This base version assumes that a filename is passed in for 
-        deletion (e.g., the file of data written from the partial analytic
-        download). 
-        
-        Parameters:
-          args    A variable length number of parameters for customization
-                  of this HOOK method.
-        
-                  In this case, the first argument arg[0] is assumed to be 
-                  a filename that should be deleted.
-        Output:   
-          Filename arg[0] is deleted
-        """
-        if len(args) != 1:
-            return
-        if os.path.isfile(args[0]):
-            os.remove(args[0])
-
+    #end log(...)       
+            
     def _duplicate_check(self, newID):
         """
         Helper method for determining if newID has already been processed

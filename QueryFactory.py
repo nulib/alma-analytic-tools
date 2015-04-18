@@ -510,10 +510,10 @@ class Worker(multiprocessing.Process):
                                        + u"> failed due to server error:\n"
                                        + unicode(e) )
                     outfile.close()
-                    # clean up the incomplete outfile
+                    # clean up the incomplete outfile              
                     if os.path.isfile(filename):
                         os.remove(filename)
-                        self.last_job[self.name] = None                        
+                        self.last_job[self.name] = None
                     # message failure to manager (index, false of failure)                    
                     self.coordinator_queue.put( (jobID, None, False) )
                     self.job_queue.task_done()
@@ -527,7 +527,7 @@ class Worker(multiprocessing.Process):
                     # clean up the incomplete outfile
                     if os.path.isfile(filename):
                         os.remove(filename)
-                        self.last_job[self.name] = None                        
+                        self.last_job[self.name] = None   
                     # message failure to manager (index, false of failure)                    
                     self.coordinator_queue.put( (jobID, None, False) )
                     self.job_queue.task_done()

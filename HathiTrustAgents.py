@@ -14,6 +14,7 @@ class BaseHathiAgent(AnalyticAgent):
         self.noOCLC = []
         self.StillLoadingSleep = 10
         self.SleepNoise = 4
+        self.noOCLCfilename = None        
 
     @staticmethod
     def data_filename(stem,extension=u'tsv',id=None,digits=None,leading='0'):
@@ -25,6 +26,7 @@ class BaseHathiAgent(AnalyticAgent):
             
     def pre_process(self):
         self.noOCLC = []
+        self.noOCLCfilename = "no-oclc-" + self._writer.name        
 
     def row_process(self, data):
          oclc = self.extractOCLC(data.get("Raw_OCLC", ""))
@@ -43,17 +45,15 @@ class BaseHathiAgent(AnalyticAgent):
 
     def post_process(self):
         # write the unique IDs of items missing OCLC numbers
-        filename = "no-oclc-" + self._writer.name
-        file = codecs.open(filename, 'w', encoding='utf-8')
+        file = codecs.open(self.noOCLCfilename, 'w', encoding='utf-8')
         file.write( unicode(self.Request.uniqueID) + u"\t"
                     + u"Title" + u"\n")
+        # print out noOCLC list        
         for id, title in self.noOCLC:
             file.write(unicode(id) + u"\t" + unicode(title) + u"\n")
         file.close()
-
+        self.noOCLCfilename = None   
         
-        # print out noOCLC list
-
     def hathiPrint(self, data, printTitle):
         return "NOT IMPLEMENTED!!!\n"
 
