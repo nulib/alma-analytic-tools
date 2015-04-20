@@ -57,6 +57,7 @@ try:
 except ImportError: # No lxml installed 
     import xml.etree.cElementTree as etree
 from random import randint, uniform
+from string import rjust
 from time import sleep, strftime
 from urllib2 import Request, urlopen, HTTPError
 from urllib import urlencode, quote_plus
@@ -227,7 +228,7 @@ class AnalyticAgent(object):
     #end load request
 
     @staticmethod
-    def data_filename(stem,extension=u'xml',id=None,digits=None,leading='0'):
+    def data_filename(stem=u'results',extension=u'xml',id=None,digits=None,leading='0'):
         """
         HOOK: Static method that returns a filename for the type of data
         that this agent will produce.
@@ -245,6 +246,7 @@ class AnalyticAgent(object):
           If id='5', digits=3, and leading='x':  stem-xx5.xml                                
 
         """
+        filename=''
         if id is None:
             filename = stem 
         elif digits is None:
@@ -540,6 +542,22 @@ class AnalyticAgent(object):
         return req
     #end generate_request
 
+    def output_names(self, data_filename):
+        """
+        Returns a list of additional file object names that could be
+        produced by this agent. For optimal usage with QueryFactory,
+        these additional file object names should be based off the string
+        in data_filename.
+
+        Parameters:
+          data_filename  The file name (string) of where data will
+                         be outputted
+
+        Output:
+          A list (including data_filename) of filenames
+        """
+        return [data_filename]
+
     def create_filter(self, tag):
         """
         Creates a sawx filter for the analytic to return values from
@@ -663,7 +681,6 @@ class AnalyticAgent(object):
         self._isFinished = False
         self._filterStopReached = False
         self._filterValue = None    
-
 
         # run initial processing step
         self.pre_process()

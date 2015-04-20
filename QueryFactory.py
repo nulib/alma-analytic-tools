@@ -80,7 +80,7 @@ class QueryFactory(object):
                     query. The  factory requires a complex RequestObject.
     AgentClass      The class object representing the type of agent to
                     use for making the queries. This should be the
-                    AnalyticAgent class or a subclass of it.
+                    AnalyticAgent class or a subclass of it.                    
     NumWorkers      An integer indicating the number of workers (separate
                     agents) to be run in parallel.
     FileStem        The filestem by which all ouputted files will be
@@ -144,8 +144,16 @@ class QueryFactory(object):
         return factory
 
     def data_filename(self, id):
-        return self.AgentClass.data_filename(self.FileStem, 
-                                             id=i, 
+        """
+        Returns the filename style used by QueryFactory. Specifically,
+        all IDs are integers with leading zeros based on the total job
+        count. If the number of jobs is <10, no leading, if <100, one
+        leading zero, <1000, two leading zeros, etc.
+
+        The file extension is set by the agent itself.
+        """
+        return self.AgentClass.data_filename(self.FileStem,
+                                             id=id, 
                                              leading='0', 
                                              digits=int(ceil(log10(self.Request.jobCount))) )
                                             
@@ -234,7 +242,7 @@ class QueryFactory(object):
         # create shared dictionary for tracking incomplete jobs
         shared_data = PersistentSyncManager()
         shared_data.start()
-        last_jobs = shared_data.dict()
+        incomplete_outputs = shared_data.dict()
 
         # create shared counter for counting all returned rows
         record_count = shared_data.Value('i', 0)
@@ -244,12 +252,12 @@ class QueryFactory(object):
         for i in xrange(numWorkers):
             path = self.Request.Paths[ i % len(self.Request.Paths) ]
             key = self.Request.Keys[ i % len(self.Request.Keys) ]
-            w = Worker(self.Request, job_queue, coordinator_queue, log_queue,
-                       last_jobs, self.FileStem, self.AgentClass,
+            w = Worker(self, self.Request, job_queue, coordinator_queue,
+                       log_queue, incomplete_outputs, self.FileStem, self.AgentClass,
                        path, key, self.AllowZeros)
             workers.append(w)
             w.name = "Worker-"+unicode(i+1)
-            last_jobs[w.name] = None # prepare last jobs
+            incomplete_outputs[w.name] = None # prepare last jobs
 
         # create logger
         logfile = QueryFactory.log_filename(self.FileStem)
@@ -259,11 +267,11 @@ class QueryFactory(object):
             log_outputs = [ codecs.open(logfile, 'w', encoding='utf-8') ]
         if self.ToStandardOut:
             log_outputs.append( sys.stdout )
-        logger = Logger(log_queue=log_queue, output=log_outputs)
+        logger = Logger(self, log_queue=log_queue, output=log_outputs)
         logger.name = "Logger"
 
         # create coordinator
-        coordinator = Coordinator(coordinator_queue=coordinator_queue,
+        coordinator = Coordinator(self, coordinator_queue=coordinator_queue,
                                   job_queue=job_queue, log_queue=log_queue, \
                                   jobs_list=jobs_list, num_workers=numWorkers, \
                                   record_count=record_count)
@@ -304,13 +312,14 @@ class QueryFactory(object):
                   file=sys.stderr)
 
             # terminate the workers first, but clean up any files that
-            # are in progress. last_jobs only contains job IDs if that
+            # are in progress. incomplete_outputs only contains job IDs if that
             # worker has not finished the query
             for w in workers:
                 print("... terminating " + w.name, file=sys.stderr)
-                if last_jobs[w.name] is not None:
-                    if os.path.isfile(last_jobs[w.name]):
-                        os.remove(last_jobs[w.name])                    
+                if incomplete_outputs[w.name] is not None:
+                    for f in incomplete_outputs[w.name]:
+                        if os.path.isfile(f):
+                            os.remove(f)                    
                 w.terminate()
                 w.join()
 
@@ -401,12 +410,14 @@ class Worker(multiprocessing.Process):
     make based on jobs pushed onto a job queue. The Worker also reports
     its progress to both a Logger and a Coordinator.
     """
-    def __init__(self, request, job_queue, coordinator_queue, log_queue,
-                 last_job, filestem, agent_class, path, apikey, allow_zeros):
+    def __init__(self, factory, request, job_queue, coordinator_queue,
+                 log_queue, incomplete_output, filestem, agent_class,
+                 path, apikey, allow_zeros):
         """
         Constructor for a Worker process. 
 
         Parameters:
+        factory             The QueryFactory generating the worker
         request             RequestObject for the queries
         job_queue           A JoinableQueue from which the worker receives
                             job IDs that determine the next query
@@ -415,13 +426,13 @@ class Worker(multiprocessing.Process):
                             (jobID, # results, boolean)
         log_queue           A Queue to which the worker posts strings
                             describing its progress.
-        last_job            A shared dictionary to which the worker places
+        incomplete_output   A shared dictionary to which the worker places
                             the ID of the current job it is working on at
-                            last_job[worker.name].
+                            incomplete_output[worker.name].
                             This entry is set to None each time a job
-                            completes. The job IDs in last_job are used to
-                            clean up incomplete files upon unexpected
-                            closing of the factory.
+                            completes. The job IDs in incomplete_output are
+                            used to clean up incomplete files upon
+                            unexpected closing of the factory.
         filestem            The filestem used for any output files.
         agent_class         The class object (a subclass of AnalyticAgent)
                             for the self.agent object the worker creates
@@ -437,6 +448,7 @@ class Worker(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
         self.daemon = True
         
+        self.factory = factory
         self.request = request
         self.job_queue = job_queue
         self.coordinator_queue = coordinator_queue
@@ -446,7 +458,7 @@ class Worker(multiprocessing.Process):
         self.path = path
         self.apikey = apikey
         self.allow_zeros = allow_zeros        
-        self.last_job = last_job
+        self.incomplete_output = incomplete_output
     #end init()
         
     def run(self):
@@ -461,11 +473,11 @@ class Worker(multiprocessing.Process):
           Grab a JobID j
           Interpret j as filtering JobBounds[j-1] to JobBounds[j]
           Create output writer
-          Set self.last_job[self.name] to j
+          Set self.incomplete_output[self.name] to j
           Run agent
           If successful completion (no exceptions):
             Close output writer
-            Set self.last_job[self.name] to None
+            Set self.incomplete_output[self.name] to None
             Inform Coordinator
           Else:
             Clean up incomplete output file
@@ -493,9 +505,9 @@ class Worker(multiprocessing.Process):
                                    + u"> starting job " + unicode(jobID) + u" "
                                    + QueryFactory.filterrange_text(filterStart,filterStop))
 
-                filename = self.agent.data_filename(self.filestem, jobID, int(ceil(log10(self.request.jobCount))))
+                filename = self.factory.data_filename(jobID)
                 outfile = codecs.open(filename,'w', encoding='utf-8')
-                self.last_job[self.name] = filename                
+                self.incomplete_output[self.name] = self.agent.output_names(filename)            
                 try:
                     n = self.agent.run(unicode(self.name), writer=outfile, logger=[self.log_queue],
                                        allowZeros=self.allow_zeros, path=self.path, apikey=self.apikey,
@@ -506,7 +518,7 @@ class Worker(multiprocessing.Process):
                                        + QueryFactory.filterrange_text(filterStart,filterStop)
                                        + u" and found " + unicode(n) + u" records" )
                     outfile.close()
-                    self.last_job[self.name] = None
+                    self.incomplete_output[self.name] = None
                     
                     # message success to manager (index, true for success)
                     self.coordinator_queue.put( (jobID, n, True) )
@@ -517,11 +529,12 @@ class Worker(multiprocessing.Process):
                                        + u"> failed due to server error:\n"
                                        + unicode(e) )
                     outfile.close()
-                    # clean up the incomplete outfile              
-                    if os.path.isfile(filename):
-                        os.remove(filename)
-                        self.last_job[self.name] = None
-                    # message failure to manager (index, false of failure)                    
+
+                    # clean up the incomplete outfile
+                    _delete_incomplete_files(self.incomplete_output[self.name])
+                    self.incomplete_output[self.name] = None                    
+
+                    # message failure to manager (index, false if failure)                    
                     self.coordinator_queue.put( (jobID, None, False) )
                     self.job_queue.task_done()
                     # sleep a little to avoid getting the same job again                    
@@ -530,11 +543,12 @@ class Worker(multiprocessing.Process):
                 except ZeroResultsError as e:
                     self.log_queue.put(strftime("%H:%M:%S") + u" : " + self.name
                                        + u"> failed due to zero results error" )
-                    outfile.close()                    
+                    outfile.close()
+
                     # clean up the incomplete outfile
-                    if os.path.isfile(filename):
-                        os.remove(filename)
-                        self.last_job[self.name] = None   
+                    _delete_incomplete_files(self.incomplete_output[self.name])
+                    self.incomplete_output[self.name] = None         
+                    
                     # message failure to manager (index, false of failure)                    
                     self.coordinator_queue.put( (jobID, None, False) )
                     self.job_queue.task_done()
@@ -547,6 +561,21 @@ class Worker(multiprocessing.Process):
             raise e
         return 
     # end run function
+
+    def _delete_incomplete_files(self, filenames):
+        """
+        Private helper method that removes all files in the list filenames.
+
+        Parameters:
+          filenames   A list of filenames
+
+        Output:
+          All filenames are deleted if they exist
+        """
+        for fn in filenames:
+            if os.path.isfile(fn):
+                os.remove(fn)
+    
 # end worker class
 
 class Logger(multiprocessing.Process):
@@ -555,11 +584,12 @@ class Logger(multiprocessing.Process):
     messages received on a dedicated logging queue. These messages
     come from the Workers and the Coordinator.
     """
-    def __init__(self, log_queue, output):
+    def __init__(self, factory,log_queue, output):
         """
         Constructor for the Logger class.
         
         Parameters:
+        factory      The QueryFactory generating the logger
         log_queue    A Queue object from which the Logger will grab
                      messages until it receives a None.
         output       A file object (or iterable container of many such
@@ -572,7 +602,8 @@ class Logger(multiprocessing.Process):
         """
         multiprocessing.Process.__init__(self)
         self.daemon = True
-        
+
+        self.factory = factory        
         self.log_queue = log_queue
         if isinstance(output, basestring):
             self.output = [output]
@@ -627,11 +658,12 @@ class Coordinator(multiprocessing.Process):
     a quit message to all workers.
     """
     
-    def __init__(self, coordinator_queue=None, job_queue=None, log_queue=None,
-                 jobs_list=None, num_workers=None, record_count=None,
-                 attempted_tolerance=5):
+    def __init__(self, factory, coordinator_queue=None, job_queue=None,
+                 log_queue=None, jobs_list=None, num_workers=None,
+                 record_count=None, attempted_tolerance=5):
         """Constructor for the Coordinator:
         Parameters:
+        factory            The QueryFactory generating the coordinator
         coordinator_queue  A queue from which the coordinator pulls status
                            reports (a tuple of jobID, # results, boolean
                            success)posted by the Workers.
@@ -651,7 +683,8 @@ class Coordinator(multiprocessing.Process):
         """
         multiprocessing.Process.__init__(self)
         self.daemon = True
-        
+
+        self.factory = factory        
         self.coordinator_queue = coordinator_queue
         self.jobs_list = jobs_list[:] # we want a copy
 
@@ -699,9 +732,13 @@ class Coordinator(multiprocessing.Process):
         try:
             while True:
                 msg = self.coordinator_queue.get()
+
+                # poison pill to stop coordinator
                 if msg is None:
                     self.log_queue.put( strftime("%H:%M:%S") + u" : Coordinator> shutting down")
                     break
+                
+                # handle the message
                 last_job = msg[0]
                 count = msg[1]
                 success = msg[2]

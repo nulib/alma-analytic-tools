@@ -22,23 +22,27 @@ class BaseHathiAgent(AnalyticAgent):
         Extension of Analytic Agent's data_filename(...) that insists upon
         the extension being tsv.
         """
-        return AnalyticAgent.data_filename(stem,u'tsv',id,digits,leading)
-            
+        return AnalyticAgent.data_filename(stem,extension=u'tsv',id,digits,leading)
+
+    def output_names(self, data_filename):
+        return [data_filename, 'no-oclc-' + data_filename]
+
     def pre_process(self):
+        # setup the noOCLC handlers and add the file name to the OutputFiles list
         self.noOCLC = []
-        self.noOCLCfilename = "no-oclc-" + self._writer.name        
+        self.noOCLCfilename = 'no-oclc-' + self._writer.name
 
     def row_process(self, data):
-         oclc = self.extractOCLC(data.get("Raw_OCLC", ""))
+         oclc = self.extractOCLC(data.get('Raw_OCLC', ''))
          if oclc is None:
-             tup = ( data.get(self.Request.uniqueID), data.get("Title") )
+             tup = ( data.get(self.Request.uniqueID), data.get('Title') )
              self.noOCLC.append(tup)
              return False
          else:
-             data["OCLC"] = oclc
+             data['OCLC'] = oclc
 
-         if data.get("Raw_ISSN", None) is not None:
-             data["ISSN"] = self.formatISSN(data.get("Raw_ISSN"))
+         if data.get('Raw_ISSN', None) is not None:
+             data['ISSN'] = self.formatISSN(data.get('Raw_ISSN'))
 
          self._writer.write(self.hathiPrint(data, BaseHathiAgent.PRINT_TITLES) + u'\n')
          return True
@@ -46,32 +50,32 @@ class BaseHathiAgent(AnalyticAgent):
     def post_process(self):
         # write the unique IDs of items missing OCLC numbers
         file = codecs.open(self.noOCLCfilename, 'w', encoding='utf-8')
-        file.write( unicode(self.Request.uniqueID) + u"\t"
-                    + u"Title" + u"\n")
+        file.write( unicode(self.Request.uniqueID) + u'\t'
+                    + u'Title' + u'\n')
         # print out noOCLC list        
         for id, title in self.noOCLC:
-            file.write(unicode(id) + u"\t" + unicode(title) + u"\n")
+            file.write(unicode(id) + u'\t' + unicode(title) + u'\n')
         file.close()
         self.noOCLCfilename = None   
         
     def hathiPrint(self, data, printTitle):
-        return "NOT IMPLEMENTED!!!\n"
+        return 'NOT IMPLEMENTED!!!\n'
 
     def extractOCLC(self, raw_oclc):
         """
-        Attempt to get the first "best" OCLC. Best is defined as the
+        Attempt to get the first 'best' OCLC. Best is defined as the
         first number that has the (OCoLC) leader and just the numbers.
         """
         oclc = None
         if raw_oclc is None:
             return None
 
-        for tok in raw_oclc.split(";"):
-            for t in tok.split(" "):
-                m = re.match("\(OCoLC\)[0-9]+", t)
+        for tok in raw_oclc.split(';'):
+            for t in tok.split(' '):
+                m = re.match('\(OCoLC\)[0-9]+', t)
                 if m is not None:
                     # found the answer
-                    parts = m.group(0).partition(")")
+                    parts = m.group(0).partition(')')
                     oclc = parts[0] + parts[1] + parts[2].zfill(8)
                     return oclc
         # if we reach here, we've screwed up or no OCLC
@@ -79,9 +83,9 @@ class BaseHathiAgent(AnalyticAgent):
 
     def formatISSN(self, raw_issn):
         # replace ; with commas
-        issn = raw_issn.replace(";", ",")
+        issn = raw_issn.replace(';', ',')
         # remove internal spaces
-        issn = issn.replace(" ", "")
+        issn = issn.replace(' ', '')
         return issn
 
         
@@ -90,11 +94,11 @@ class HathiSerialAgent(BaseHathiAgent):
         BaseHathiAgent.__init__(self)
 
     def hathiPrint(self, data, printTitle):
-        oclc = data.get("OCLC")
-        issn = data.get("ISSN", "")
-        localid = data.get("MMS_ID")
-        title = data.get("Title")
-        govid = "" # we don't track this so it's always empty
+        oclc = data.get('OCLC')
+        issn = data.get('ISSN', '')
+        localid = data.get('MMS_ID')
+        title = data.get('Title')
+        govid = '' # we don't track this so it's always empty
 
         items = [ oclc, localid, issn, govid ]
         if printTitle:
@@ -107,13 +111,13 @@ class HathiMPMAgent(BaseHathiAgent):
         BaseHathiAgent.__init__(self)
 
     def hathiPrint(self, data, printTitle):
-        title = data.get("Title", "")
-        oclc = data.get("OCLC", "")
-        localid = data.get("Holding_ID") + u"/" + data.get("MMS_ID")
-        status = "" # we drop missing/lost eventually, so skip this
-        condition = "" # we don't track this one so it's always empty
-        chronology = data.get("Summary_Holding", "")
-        govid = "" # we don't track this so it's always empty
+        title = data.get('Title', '')
+        oclc = data.get('OCLC', '')
+        localid = data.get('Holding_ID') + u'/' + data.get('MMS_ID')
+        status = '' # we drop missing/lost eventually, so skip this
+        condition = '' # we don't track this one so it's always empty
+        chronology = data.get('Summary_Holding', '')
+        govid = '' # we don't track this so it's always empty
 
         items = [ oclc, localid, status, condition, chronology, govid ]
         if printTitle:
@@ -126,14 +130,14 @@ class HathiSPMAgent(BaseHathiAgent):
         BaseHathiAgent.__init__(self)
 
     def hathiPrint(self, data, printTitle):
-        title = data.get("Title", "")
-        oclc = data.get("OCLC", "")
-        localid = data.get("Item_ID") + \
-                  u"/" + data.get("Holding_ID") + \
-                  u"/" + data.get("MMS_ID")
-        status = "" # we drop missing/lost eventually, so skip this
-        condition = "" # we don't track this one so it's always empty
-        govid = "" # we don't track this so it's always empty
+        title = data.get('Title', '')
+        oclc = data.get('OCLC', '')
+        localid = data.get('Item_ID') + \
+                  u'/' + data.get('Holding_ID') + \
+                  u'/' + data.get('MMS_ID')
+        status = '' # we drop missing/lost eventually, so skip this
+        condition = '' # we don't track this one so it's always empty
+        govid = '' # we don't track this so it's always empty
 
         items = [ oclc, localid, status, condition, govid ]
         if printTitle:

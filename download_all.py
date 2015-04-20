@@ -141,7 +141,7 @@ def main(argv):
 
     print(u"Output files: ")
     print(u"   " + unicode(numJobs) + " data file(s): " \
-          + AnalyticAgent.data_filename(fileStem,u'#'))
+          + AnalyticAgent.data_filename(fileStem,id=u'#'))
 
     print(u"   " + u"1 file mapping job numbers to bounds: " \
           + QueryFactory.jobmap_filename(fileStem) )
