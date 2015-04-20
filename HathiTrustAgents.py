@@ -22,7 +22,7 @@ class BaseHathiAgent(AnalyticAgent):
         Extension of Analytic Agent's data_filename(...) that insists upon
         the extension being tsv.
         """
-        return AnalyticAgent.data_filename(stem,extension=u'tsv',id,digits,leading)
+        return AnalyticAgent.data_filename(stem,u'tsv',id,digits,leading)
 
     def output_names(self, data_filename):
         return [data_filename, 'no-oclc-' + data_filename]

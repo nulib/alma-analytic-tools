@@ -148,8 +148,9 @@ def main(argv):
         if opt in ['--serial', '--spm', '--mpm' ]:
             n = n + 1
     if n == 0:
-        print(u'You must include a holding type: --serial, --spm, or --mpm',
+        print(u'You must include a holding type: --serial, --spm, or --mpm\n',
               file=sys.stderr)
+        print_help()
         sys.exit(2)
     elif n > 1:
         print(u'You can only request one holding type at a time!',
