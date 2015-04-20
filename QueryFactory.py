@@ -143,6 +143,13 @@ class QueryFactory(object):
         factory.ResumeWork = resume_work
         return factory
 
+    def data_filename(self, id):
+        return self.AgentClass.data_filename(self.FileStem, 
+                                             id=i, 
+                                             leading='0', 
+                                             digits=int(ceil(log10(self.Request.jobCount))) )
+                                            
+        
     def engage(self):
         """
         Make the factory begin querying the analytic as according to the
@@ -172,7 +179,7 @@ class QueryFactory(object):
         writer = codecs.open(QueryFactory.jobmap_filename(self.FileStem),
                              'w', encoding='utf-8')
         for i in jobs_list:
-            writer.write(self.AgentClass.data_filename(self.FileStem, i, int(ceil(log10(self.Request.jobCount)))))
+            writer.write(self.data_filename(i))
             writer.write(u'\t')
             writer.write(QueryFactory.filterrange_text(self.Request.JobBounds[i-1],
                                                        self.Request.JobBounds[i]))
@@ -185,7 +192,7 @@ class QueryFactory(object):
             print("Checking previously completed work before resuming...")
             _unfinished = []
             for job in jobs_list:
-                _filename = self.AgentClass.data_filename(self.FileStem, job, int(ceil(log10(self.Request.jobCount))))
+                _filename = self.data_filename(job)
                 if not os.path.isfile(_filename):
                     _unfinished.append(job)
 
