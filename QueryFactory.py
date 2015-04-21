@@ -531,7 +531,7 @@ class Worker(multiprocessing.Process):
                     outfile.close()
 
                     # clean up the incomplete outfile
-                    _delete_incomplete_files(self.incomplete_output[self.name])
+                    self._delete_incomplete_files(self.incomplete_output[self.name])
                     self.incomplete_output[self.name] = None                    
 
                     # message failure to manager (index, false if failure)                    
@@ -546,7 +546,7 @@ class Worker(multiprocessing.Process):
                     outfile.close()
 
                     # clean up the incomplete outfile
-                    _delete_incomplete_files(self.incomplete_output[self.name])
+                    self._delete_incomplete_files(self.incomplete_output[self.name])
                     self.incomplete_output[self.name] = None         
                     
                     # message failure to manager (index, false of failure)                    
