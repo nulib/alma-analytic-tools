@@ -116,6 +116,13 @@ class AnalyticAgent(object):
     tolerance values indicate how many times the agent will sent requests
     before giving up when faced with these problems.
 
+    StillLoadingTolerance
+    Sometimes, the analytic takes time to load before it can send data. In
+    general, you wait a bit before resending the request with the provided
+    resume token. However, the resume token eventually expires. When the
+    number of tries reaches this value, the current token is discarded and
+    a new one is grabbed on the next request.
+
     ErrorSleep
     The number of seconds the agent should wait before resending a
     request after experiencing one of the aforementioned errors.
@@ -188,6 +195,7 @@ class AnalyticAgent(object):
         self.Request = None
         self.FailedRequestTolerance = 3
         self.ZeroResultTolerance = 4
+        self.StillLoadingTolerance = 6
         self.ErrorSleep = 15
         self.StillLoadingSleep = 5
         self.SleepNoise = 2
@@ -801,6 +809,7 @@ class AnalyticAgent(object):
         row_namespace = None
         self._isFinished = False
         zeroTries = 0
+        isLoadingTries = 0
 
         # keep cycling until we either get data (triggers a break)
         # or we throw either AnalyticServerException or ZeroResultsException
@@ -820,7 +829,7 @@ class AnalyticAgent(object):
                     response = urlopen(_request).read()
                     loopFlag = False                    
                 except HTTPError as e:
-                    # if we do, sleep and try again until tolerance exceeded					
+                    # if we do, sleep and try again until tolerance exceeded
                     if requestTries < self.FailedRequestTolerance:
                         loopFlag = True
                         msg = u"Returned data:" + u"\n"
@@ -854,6 +863,11 @@ class AnalyticAgent(object):
             # solution: sleep for a bit and try again using the resume token
             if (len(data_xml.find(".//ResultXml")) == 0):
                 self.log(self._jobName + u"> Analytic is still loading...")
+                isLoadingTries = isLoadingTries + 1
+                if isLoadingTries == self.StillLoadingTolerance:
+                    # reset token and isLoadingTries
+                    isLoadingTries = 0
+                    self._resumeToken = None                    
                 self.noisy_sleep(self.StillLoadingSleep, self.SleepNoise)
                 continue
 
