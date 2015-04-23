@@ -574,6 +574,8 @@ class AnalyticAgent(object):
         tag.
 
         Notes:
+          Lone, whitespace-bounded & are converted to &amp;
+        
           To avoid processing issues, any apostrophes in tag are
           replaced with &apos;.
 
@@ -598,8 +600,16 @@ class AnalyticAgent(object):
 
         filterType = self.Request.sortedByType.encode('utf-8')
 
+        # take care of apostrophes
         tag = unicode(tag)
         cleanTag = tag.replace(u"'",u"&apos;")
+
+
+        # take care of non-entity &
+        pattern = re.compile(u'&(\W)', re.UNICODE|re.MULTILINE)
+        cleanTag = re.sub(pattern, u'&amp;\\1', cleanTag)
+        pattern = re.compile(u'&$', re.UNICODE|re.MULTILINE)
+        cleanTag = re.sub(pattern, u'&amp;', cleanTag)
 
         filter = filter.replace(u'#FIELD#', filterField)
         filter = filter.replace(u'#TYPE#', filterType)
