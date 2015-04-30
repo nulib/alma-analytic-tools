@@ -113,10 +113,15 @@ class HathiMPMAgent(BaseHathiAgent):
     def hathiPrint(self, data, printTitle):
         title = data.get('Title', '')
         oclc = data.get('OCLC', '')
-        localid = data.get('Holding_ID') + u'/' + data.get('MMS_ID')
+        localid = data.get('Item_ID') + \
+                  u'/' + data.get('Holding_ID') + \
+                  u'/' + data.get('MMS_ID')        
         status = 'CH' # we drop missing/lost eventually, so skip this
         condition = '' # we don't track this one so it's always empty
-        chronology = data.get('Summary_Holding', '')
+        chronology = data.get('Description', '')
+        if chronology is None:
+            chronology = data.get('Summary_Holding','')
+            
         govid = '' # we don't track this so it's always empty
 
         items = [ oclc, localid, status, condition, chronology, govid ]
