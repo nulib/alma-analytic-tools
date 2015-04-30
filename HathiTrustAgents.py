@@ -114,7 +114,7 @@ class HathiMPMAgent(BaseHathiAgent):
         title = data.get('Title', '')
         oclc = data.get('OCLC', '')
         localid = data.get('Holding_ID') + u'/' + data.get('MMS_ID')
-        status = '' # we drop missing/lost eventually, so skip this
+        status = 'CH' # we drop missing/lost eventually, so skip this
         condition = '' # we don't track this one so it's always empty
         chronology = data.get('Summary_Holding', '')
         govid = '' # we don't track this so it's always empty
@@ -135,7 +135,7 @@ class HathiSPMAgent(BaseHathiAgent):
         localid = data.get('Item_ID') + \
                   u'/' + data.get('Holding_ID') + \
                   u'/' + data.get('MMS_ID')
-        status = '' # we drop missing/lost eventually, so skip this
+        status = 'CH' # we drop missing/lost eventually, so skip this
         condition = '' # we don't track this one so it's always empty
         govid = '' # we don't track this so it's always empty
 
