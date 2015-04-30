@@ -21,12 +21,14 @@ Begin NamesToColumns
 Title	Column3
 MMS_ID	Column1
 Holding_ID	Column4
+Item_ID	Column7
 Summary_Holding	Column5
+Description	Column6
 Raw_OCLC	Column2
 End NamesToColumns
 
 # should be one of the preferred names
-uniqueID	Holding_ID
+uniqueID	Item_ID
 
 # should be a preferred name 
 sortedBy	Title
