@@ -47,6 +47,9 @@ Each file contains detailed python docstrings and comments. In addition, this wi
 [HathiTrust Print Holdings Download](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools/wiki/HathiTrust%20Print%20Holdings)
 : Details on how to use the code for downloading [print holdings for HathiTrust](http://www.hathitrust.org/print_holdings).
 
+; [[https://bitbucket.org/uwlib/uwlib-alma-analytic-tools/raw/master/images/deibel-alma-analytics-api.pptx|Alma Analytics API Talk]]
+: PowerPoint slides from a talk I gave at the 2015 Summer Meeting for the Orbis Cascade Alliance on the quirks of using the Alma Analytic API.
+
 ## License ##
 This code is released under the OpenBSD license: 
 
