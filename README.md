@@ -1,4 +1,6 @@
-# University of Washington Libraries Alma Analytic Tools #
+# NU Libraries Alma Analytic Tools #
+This repository was cloned from [UW Libraries Alma Analytic Tools](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools)
+
 Alma's analytics are powerful tools for accessing, collecting, and exploring the various information contained within an Alma repository. Despite options such as reports and dashboards for communicating any analytic results, sometimes one needs access to the raw data itself. For such purposes, one must use the Alma RESTful APIs and perform one or more HTTP GET requests. This package provides a Python implementation to simplify and support that process.
 
 ## Content Highlights ##
@@ -51,7 +53,7 @@ Each file contains detailed python docstrings and comments. In addition, this wi
 : PowerPoint slides from a talk I gave at the 2015 Summer Meeting for the Orbis Cascade Alliance on the quirks of using the Alma Analytic API.
 
 ## License ##
-This code is released under the OpenBSD license: 
+This code is released under the OpenBSD license:
 
 Copyright (c) 2014 Katherine Deibel
 
