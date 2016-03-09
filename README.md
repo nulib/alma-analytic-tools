@@ -1,4 +1,4 @@
-# NU Libraries Alma Analytic Tools #
+# Alma Analytic Tools #
 This repository was cloned from [UW Libraries Alma Analytic Tools](https://bitbucket.org/uwlib/uwlib-alma-analytic-tools)
 
 Alma's analytics are powerful tools for accessing, collecting, and exploring the various information contained within an Alma repository. Despite options such as reports and dashboards for communicating any analytic results, sometimes one needs access to the raw data itself. For such purposes, one must use the Alma RESTful APIs and perform one or more HTTP GET requests. This package provides a Python implementation to simplify and support that process.
